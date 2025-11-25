@@ -1,3 +1,3 @@
 variable "bucket_name" {
-  default = "pgrdigit-s3-bucket"
+  default = "pgrdigit-s3-infra-bucket"
 }
