@@ -8,7 +8,7 @@ cluster_name: "pgr-eks-cluster"
 db_name: "digitpgrdb"
 
 # Replace with DB username you want
-# DB user name must contain only alphanumeric characters
+# DB user name must contain only alphanumeric chsaracters
 db_username: "digitpgr"
 
 # Replace with Domain name you want for your web applications
