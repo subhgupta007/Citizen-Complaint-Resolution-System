@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "pgrdigit-s3-bucket"
+    bucket = <terraform_state_bucket_name>
     key    = "terraform-setup/terraform.tfstate"
     region = "ap-south-1"
     # The below line is optional depending on whether you are using DynamoDB for state locking and consistency
