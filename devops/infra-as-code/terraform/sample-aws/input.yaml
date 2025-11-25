@@ -15,7 +15,7 @@ db_username: "digitpgr"
 domain_name: "www.pgrdigit.com"
 
 # Replace with the name you want to give to your S3 bucket which is used to store the terraform state
-terraform_state_bucket_name: "pgrdigit-s3-bucket"
+terraform_state_bucket_name: "pgrdigit-s3-infra-bucket"
 
 public_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCpUlIyjVpIhzkWpZfEyaHMguym0JvCNTIsxpDQR+z31wQ2hfZINC3s9aUS+SPCRpk3b2FYbuJ+FbeyrlwtqIJKWae0V9hMI04PV/hhOtetmukclcE2PnuIBUmvkAexfFx+uFzaNfmYuZPJnNJo0IB9vlXUiofICmd9SOWfr4K9PX/ntc5eMTso4mgDDAsJbNHjC7sLZaO+Kye2fiqYnSdK8caQ/mp3vG+PuXIsrCrj7vW+noDctTPNjYcxEosUH5jwVNAGnenN4/ANHD55vO13fLUrP+e2YIDt7k4CwGCDWQNV6c4pl4MyncWNTFd+IbWu5ROAzYm2Znei1pXfjYU1"
 
