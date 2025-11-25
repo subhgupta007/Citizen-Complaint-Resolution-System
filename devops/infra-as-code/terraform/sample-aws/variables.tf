@@ -5,7 +5,7 @@
 
 variable "cluster_name" {
   description = "Name of the Kubernetes cluster"
-  default = <cluster_name> #REPLACE
+  default ="pgr-eks-cluster"#REPLACE
 }
 
 variable "vpc_cidr_block" {
@@ -26,7 +26,7 @@ variable "availability_zones" {
 
 variable "kubernetes_version" {
   description = "kubernetes version"
-  default = "1.31"
+  default = "1.32"
 }
 
 variable "instance_types" {
@@ -56,7 +56,7 @@ variable "max_worker_nodes" {
 
 variable "db_version" {
   description = "postgres version"
-  default = "15.8"
+  default = "16.5"
 }
 
 variable "db_instance_type" {
@@ -66,12 +66,12 @@ variable "db_instance_type" {
 
 variable "db_name" {
   description = "RDS DB name. Make sure there are no hyphens or other special characters in the DB name. Else, DB creation will fail"
-  default = <db_name> #REPLACE
+  default = "digitpgrdb" #REPLACE
 }
 
 variable "db_username" {
   description = "RDS database user name"
-  default = <db_username> #REPLACE
+  default = "digitpgr"#REPLACE
 }
 
 variable "ami_id" {
