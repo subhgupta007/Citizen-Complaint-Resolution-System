@@ -5,7 +5,7 @@
 
 variable "cluster_name" {
   description = "Name of the Kubernetes cluster"
-  default ="pgr-cluster"#REPLACE
+  default ="pgr-eks-cluster"#REPLACE
 }
 
 variable "vpc_cidr_block" {
@@ -56,7 +56,7 @@ variable "max_worker_nodes" {
 
 variable "db_version" {
   description = "postgres version"
-  default = "16.5"
+  default = "16.6"
 }
 
 variable "db_instance_type" {
