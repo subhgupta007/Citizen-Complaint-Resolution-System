@@ -5,7 +5,7 @@
 
 variable "cluster_name" {
   description = "Name of the Kubernetes cluster"
-  default ="pgr-eks-cluster"#REPLACE
+  default ="pgr-cluster"#REPLACE
 }
 
 variable "vpc_cidr_block" {
