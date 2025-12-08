@@ -36,4 +36,17 @@ config:
         dockerfile: frontend/micro-ui/web/docker/Dockerfile
         image-name: digit-ui
 
+  - name: "builds/URBAN/tradelicense/tl-services"
+    build:
+      - work-dir: "urban-src/tradelicense/tl-services"
+        image-name: "tl-services"
+        dockerfile: "build/maven/Dockerfile"
+
+  - name: "builds/URBAN/tradelicense/tl-calculator"
+    build:
+      - work-dir: "urban-src/tradelicense/tl-calculator"
+        image-name: "tl-calculator"
+        dockerfile: "build/maven/Dockerfile"
+      
+
 

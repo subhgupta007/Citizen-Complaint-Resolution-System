@@ -12,6 +12,9 @@ on:
           - pgr-services
           - default-data-handler
           - digit-ui
+          - tl-services
+          - tl-calculator
+          
 
 env:
   DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
@@ -33,6 +36,15 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Checkout URBAN (for TL services)
+        if: ${{ github.event.inputs.pipeline_name == 'tl-services' || github.event.inputs.pipeline_name == 'tl-calculator' }}
+        uses: actions/checkout@v4
+        with:
+          repository: subhgupta007/URBAN
+          ref: master
+          path: urban-src
+
 
       - name: Install yq
         run: |
