@@ -12,7 +12,7 @@ ingress:
 # Init Containers Configs
 initContainers:
   dbMigration:
-    enabled: true   # first time true then false
+    enabled: false   # first time true then false
     schemaTable: "tl_calculator_schema"
     image:
       repository: "egovio/tl-calculator-db"
