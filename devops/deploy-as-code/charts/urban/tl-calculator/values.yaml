@@ -69,6 +69,18 @@ env: |
         name: egov-config
         key: db-url
 
+  - name: SPRING_DATASOURCE_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: db-tlcalc
+        key: username
+
+  - name: SPRING_DATASOURCE_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: db-tlcalc
+        key: password      
+
   - name: SPRING_KAFKA_CONSUMER_GROUP_ID
     value: "tl-calculator"
   - name: SPRING_KAFKA_PRODUCER_KEY_SERIALIZER
