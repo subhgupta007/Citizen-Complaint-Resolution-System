@@ -31,6 +31,10 @@ releases:
     installed: true
     <<: *default  
 
+  - name: tl-calculator # New Trade License calculator service
+    installed: true
+    <<: *default  
+    
   - name: default-data-handler # Replace with your desired namespace
     installed: true
     <<: *default
