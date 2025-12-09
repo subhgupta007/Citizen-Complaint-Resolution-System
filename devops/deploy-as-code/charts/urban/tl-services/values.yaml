@@ -19,32 +19,30 @@ initContainers:
       tag: "v2_migration-a0c19398"
       pullPolicy: "IfNotPresent"
     env: |
-        {{- if index .Values "pgr-ismultischema-enabled" }}
-        - name: SCHEMA_NAME
-          value: {{ index .Values "pgr-schemas" | quote }}
-        {{- end }}
-        - name: "DB_URL"
-          valueFrom:
-            configMapKeyRef:
-              name: egov-config
-              key: db-url
-        - name: "SCHEMA_TABLE"
-          value: {{ .Values.initContainers.dbMigration.schemaTable | quote }}
-        - name: "FLYWAY_USER"
-          valueFrom:
-            secretKeyRef:
-              name: db
-              key: flyway-username
-        - name: "FLYWAY_PASSWORD"
-          valueFrom:
-            secretKeyRef:
-              name: db
-              key: flyway-password
-        - name: "FLYWAY_LOCATIONS"
-          valueFrom:
-            configMapKeyRef:
-              name: egov-config
-              key: flyway-locations
+      {{- if index .Values "pgr-ismultischema-enabled" }}
+      - name: SCHEMA_NAME
+        value: {{ index .Values "pgr-schemas" | quote }}
+      {{- end }}
+      - name: "DB_URL"
+        value: "jdbc:postgresql://pgr-eks-cluster-db.cdoy2wumu54z.ap-south-1.rds.amazonaws.com:5432/digitpgrdb?sslmode=require"
+      - name: "SCHEMA_TABLE"
+        value: {{ .Values.initContainers.dbMigration.schemaTable | quote }}
+      - name: "FLYWAY_USER"
+        valueFrom:
+          secretKeyRef:
+            name: db
+            key: flyway-username
+      - name: "FLYWAY_PASSWORD"
+        valueFrom:
+          secretKeyRef:
+            name: db
+            key: flyway-password
+      - name: "FLYWAY_LOCATIONS"
+        valueFrom:
+          configMapKeyRef:
+            name: egov-config
+            key: flyway-locations
+
 
 # Container Configs
 image:
