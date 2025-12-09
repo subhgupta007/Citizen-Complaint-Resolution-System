@@ -20,10 +20,7 @@ initContainers:
       pullPolicy: "IfNotPresent"
     env: |
       - name: "DB_URL"
-        valueFrom:
-          configMapKeyRef:
-            name: egov-config
-            key: db-url
+        value: "jdbc:postgresql://pgr-eks-cluster-db.cdoy2wumu54z.ap-south-1.rds.amazonaws.com:5432/digitpgrdb?sslmode=require"
       - name: "SCHEMA_TABLE"
         value: {{ .Values.initContainers.dbMigration.schemaTable | quote }}
       - name: "FLYWAY_USER"
