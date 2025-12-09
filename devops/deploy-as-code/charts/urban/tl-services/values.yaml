@@ -15,8 +15,8 @@ initContainers:
     enabled: true
     schemaTable: "tl_services_schema"
     image:
-      repository: "belegovgithub/tl-services-db"
-      tag: "72-BEL-v2-tl-services-sync-prod-480cc1435"
+      repository: "egovio/tl-services-db"
+      tag: "v2_migration-a0c19398"
       pullPolicy: "IfNotPresent"
     env: |
         {{- if index .Values "pgr-ismultischema-enabled" }}
@@ -48,8 +48,8 @@ initContainers:
 
 # Container Configs
 image:
-  repository: "belegovgithub/tl-services"
-  tag: "72-BEL-v2-tl-services-sync-prod-480cc1435"
+  repository: "egovio/tl-services"
+  tag: "v2_migration-a0c19398"
 replicas: "1"
 healthChecks:
   enabled: true
