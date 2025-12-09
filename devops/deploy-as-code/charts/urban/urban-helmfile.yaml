@@ -27,6 +27,10 @@ releases:
     installed: true
     <<: *default
 
+  - name: tl-services # New Trade License backend
+    installed: true
+    <<: *default  
+
   - name: default-data-handler # Replace with your desired namespace
     installed: true
     <<: *default
