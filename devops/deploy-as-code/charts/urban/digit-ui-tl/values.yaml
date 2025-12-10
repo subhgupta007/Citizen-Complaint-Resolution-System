@@ -16,8 +16,8 @@ initContainers: {}
 # Container Configs
 image:
   # This must match your Docker Hub repo name (egovio/digit-ui-tl:...)
-  repository: "digit-ui-tl"
-  tag: "module-upgrade-6abeabd1fa-9"
+  repository: "digit-ui"
+  tag: "solina-kano-impel-28168634a0-416"
 
 replicas: "1"
 
