@@ -1,0 +1,42 @@
+# Common Labels
+labels:
+  app: "digit-ui-tl"
+  group: "web"
+
+# Ingress Configs
+ingress:
+  enabled: true
+  # This will expose the TL UI at:
+  #   https://www.pgrdigit.in/digit-ui-tl/
+  context: "digit-ui-tl"
+
+# Init Containers Configs
+initContainers: {}
+
+# Container Configs
+image:
+  # This must match your Docker Hub repo name (egovio/digit-ui-tl:...)
+  repository: "digit-ui-tl"
+  tag: "module-upgrade-6abeabd1fa-9"
+
+replicas: "1"
+
+httpPort: 80
+
+healthChecks:
+  enabled: true
+  # Nginx-based UI health on the same base path as ingress context
+  livenessProbePath: "/digit-ui-tl/"
+  readinessProbePath: "/digit-ui-tl/"
+
+# Mount the same js-injection ConfigMap used by digit-ui
+# (safe & quickest option for now)
+extraVolumes: |
+  - name: js-injection
+    configMap:
+      name: digit-ui
+
+extraVolumeMounts: |
+  - mountPath: /etc/nginx/conf.d/sub_filter.conf
+    name: js-injection
+    subPath: sub_filter.conf

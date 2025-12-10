@@ -34,9 +34,15 @@ releases:
   - name: tl-calculator # New Trade License calculator service
     installed: true
     <<: *default  
-    
+
   - name: default-data-handler # Replace with your desired namespace
     installed: true
     <<: *default
+  
+  - name: digit-ui-tl # New Trade License ui
+    installed: true
+    <<: *default  
+
+    
 
   # Frontend services end

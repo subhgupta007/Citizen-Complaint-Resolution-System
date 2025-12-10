@@ -1,0 +1,16 @@
+apiVersion: v2
+name: digit-ui-tl
+description: A Helm chart for DIGIT Trade License UI
+
+type: application
+
+# Chart version – keep in sync when you change chart/templates
+version: 0.1.0
+
+# Application version – align with the image tag you are using
+appVersion: module-upgrade-6abeabd1fa-9
+
+dependencies:
+  - name: common
+    version: 0.0.5
+    repository: file://../../common

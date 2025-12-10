@@ -35,6 +35,13 @@ config:
       - work-dir: frontend/micro-ui/
         dockerfile: frontend/micro-ui/web/docker/Dockerfile
         image-name: digit-ui
+   
+  - name: "builds/Citizen-Complaint-Resolution-System/frontend/micro-ui/digit-ui-tl"
+    build:
+      - work-dir: "frontend-src/micro-ui"
+        dockerfile: "frontend-src/micro-ui/web/docker/Dockerfile"
+        image-name: "digit-ui-tl"
+
 
   - name: "builds/URBAN/tradelicense/tl-services"
     build:
