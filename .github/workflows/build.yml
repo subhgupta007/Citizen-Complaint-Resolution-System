@@ -389,7 +389,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Checkout URBAN (for TL services)
-        if: ${{ github.event.inputs.pipeline_name == 'tl-services' || github.event.inputs.pipeline_name == 'tl-calculator' }}
+        if: ${{ github.event.inputs.pipeline_name == 'tl-services' || github.event.inputs.pipeline_name == 'tl-calculator'|| github.event.inputs.pipeline_name == 'digit-ui-tl'  }}
         uses: actions/checkout@v4
         with:
           repository: subhgupta007/URBAN
@@ -397,7 +397,7 @@ jobs:
           path: urban-src
 
       - name: Checkout DIGIT-Frontend (for digit UI pipelines)
-        if: ${{ github.event.inputs.pipeline_name == 'digit-ui' || github.event.inputs.pipeline_name == 'digit-ui-tl' }}
+        if: ${{ github.event.inputs.pipeline_name == 'digit-ui' }}
         uses: actions/checkout@v4
         with:
           repository: subhgupta007/DIGIT-Frontend
