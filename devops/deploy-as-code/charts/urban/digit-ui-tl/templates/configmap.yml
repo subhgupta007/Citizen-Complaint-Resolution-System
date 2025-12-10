@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: digit-ui-tl
+  namespace: egov
+data:
+  sub_filter.conf: |
+    # Rewrite asset paths from /digit-ui/ → /digit-ui-tl/
+    sub_filter_once off;
+    sub_filter 'src="/digit-ui/' 'src="/digit-ui-tl/';
+    sub_filter 'href="/digit-ui/' 'href="/digit-ui-tl/';
