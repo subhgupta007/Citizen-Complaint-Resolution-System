@@ -519,15 +519,15 @@ jobs:
           - arch: amd64
             platform: linux/amd64
             runner: ubuntu-latest
-          - arch: arm64
-            platform: linux/arm64
-            runner: ubuntu-24.04-arm
+          # - arch: arm64
+          #   platform: linux/arm64
+          #   runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     outputs:
       amd64_digest: ${{ steps.digest_amd64.outputs.digest }}
       amd64_digest_db: ${{ steps.digest_db_amd64.outputs.digest }}
-      arm64_digest: ${{ steps.digest_arm64.outputs.digest }}
-      arm64_digest_db: ${{ steps.digest_db_arm64.outputs.digest }}
+      # arm64_digest: ${{ steps.digest_arm64.outputs.digest }}
+      # arm64_digest_db: ${{ steps.digest_db_arm64.outputs.digest }}
     steps:
       - name: Checkout Citizen-Complaint-Resolution-System
         uses: actions/checkout@v3
@@ -614,14 +614,14 @@ jobs:
             --format '{{json .}}' | jq -r '.manifest.manifests[] | select(.platform.architecture=="amd64") | .digest')
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
-      - name: Export digest service (arm64)
-        if: matrix.arch == 'arm64'
-        id: digest_arm64
-        run: |
-          digest=$(docker buildx imagetools inspect \
-            "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.service_image_name }}:${{ needs.resolve-config.outputs.tag }}-${{ matrix.arch }}" \
-            --format '{{json .}}' | jq -r '.manifest.manifests[] | select(.platform.architecture=="arm64") | .digest')
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      # - name: Export digest service (arm64)
+      #   if: matrix.arch == 'arm64'
+      #   id: digest_arm64
+      #   run: |
+      #     digest=$(docker buildx imagetools inspect \
+      #       "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.service_image_name }}:${{ needs.resolve-config.outputs.tag }}-${{ matrix.arch }}" \
+      #       --format '{{json .}}' | jq -r '.manifest.manifests[] | select(.platform.architecture=="arm64") | .digest')
+      #     echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
       - name: Export digest DB (amd64)
         if: matrix.arch == 'amd64' && needs.resolve-config.outputs.db_folder_exists == 'true'
@@ -632,14 +632,14 @@ jobs:
             --format '{{json .}}' | jq -r '.manifest.manifests[] | select(.platform.architecture=="amd64") | .digest')
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
-      - name: Export digest DB (arm64)
-        if: matrix.arch == 'arm64' && needs.resolve-config.outputs.db_folder_exists == 'true'
-        id: digest_db_arm64
-        run: |
-          digest=$(docker buildx imagetools inspect \
-            "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.db_image_name }}:${{ needs.resolve-config.outputs.tag }}-${{ matrix.arch }}" \
-            --format '{{json .}}' | jq -r '.manifest.manifests[] | select(.platform.architecture=="arm64") | .digest')
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      # - name: Export digest DB (arm64)
+      #   if: matrix.arch == 'arm64' && needs.resolve-config.outputs.db_folder_exists == 'true'
+      #   id: digest_db_arm64
+      #   run: |
+      #     digest=$(docker buildx imagetools inspect \
+      #       "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.db_image_name }}:${{ needs.resolve-config.outputs.tag }}-${{ matrix.arch }}" \
+      #       --format '{{json .}}' | jq -r '.manifest.manifests[] | select(.platform.architecture=="arm64") | .digest')
+      #     echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
   create-manifest:
     name: Create and push manifest
