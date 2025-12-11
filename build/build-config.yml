@@ -36,10 +36,10 @@ config:
         dockerfile: frontend/micro-ui/web/docker/Dockerfile
         image-name: digit-ui
    
-  - name: "builds/Citizen-Complaint-Resolution-System/frontend/micro-ui/digit-ui-tl"
+  - name: "builds/urban/frontend/micro-ui/digit-ui-tl"
     build:
-      - work-dir: "frontend-src/micro-ui"
-        dockerfile: "frontend-src/micro-ui/web/docker/Dockerfile"
+      - work-dir: "urban-src/frontend/micro-ui"
+        dockerfile: "urban-src/frontend/micro-ui/web/docker/Dockerfile"
         image-name: "digit-ui-tl"
 
 
