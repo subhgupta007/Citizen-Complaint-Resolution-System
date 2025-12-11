@@ -656,43 +656,62 @@ jobs:
 
       - name: Create and push Docker manifest (application)
         run: |
+          set -euxo pipefail
+
+          IMAGE_BASE="${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.service_image_name }}"
+          TAG="${{ needs.resolve-config.outputs.tag }}"
+          AMD64_DIGEST="${{ needs.build-matrix.outputs.amd64_digest }}"
+
+          if [ -z "$AMD64_DIGEST" ]; then
+            echo "ERROR: amd64_digest is empty, cannot create application manifest"
+            exit 1
+          fi
+
+          # Create a single-arch manifest pointing to the amd64 image
           docker manifest create \
-            "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.service_image_name }}:${{ needs.resolve-config.outputs.tag }}" \
-            --amend "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.service_image_name }}@${{ needs.build-matrix.outputs.amd64_digest }}" \
-            --amend "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.service_image_name }}@${{ needs.build-matrix.outputs.arm64_digest }}"
-          docker manifest push \
-            "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.service_image_name }}:${{ needs.resolve-config.outputs.tag }}"
+            "${IMAGE_BASE}:${TAG}" \
+            --amend "${IMAGE_BASE}@${AMD64_DIGEST}"
+
+          docker manifest push "${IMAGE_BASE}:${TAG}"
 
       - name: Create and push Docker manifest (DB)
         if: needs.resolve-config.outputs.db_folder_exists == 'true'
         run: |
+          set -euxo pipefail
+
+          IMAGE_BASE_DB="${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.db_image_name }}"
+          TAG="${{ needs.resolve-config.outputs.tag }}"
+          AMD64_DIGEST_DB="${{ needs.build-matrix.outputs.amd64_digest_db }}"
+
+          if [ -z "$AMD64_DIGEST_DB" ]; then
+            echo "ERROR: amd64_digest_db is empty, cannot create DB manifest"
+            exit 1
+          fi
+
           docker manifest create \
-            "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.db_image_name }}:${{ needs.resolve-config.outputs.tag }}" \
-            --amend "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.db_image_name }}@${{ needs.build-matrix.outputs.amd64_digest_db }}" \
-            --amend "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.db_image_name }}@${{ needs.build-matrix.outputs.arm64_digest_db }}"
-          docker manifest push \
-            "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.db_image_name }}:${{ needs.resolve-config.outputs.tag }}"
+            "${IMAGE_BASE_DB}:${TAG}" \
+            --amend "${IMAGE_BASE_DB}@${AMD64_DIGEST_DB}"
+
+          docker manifest push "${IMAGE_BASE_DB}:${TAG}"
 
       - name: Cleanup local manifest refs (application)
         run: |
           docker manifest rm "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.service_image_name }}:${{ needs.resolve-config.outputs.tag }}-amd64" || true
-          docker manifest rm "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.service_image_name }}:${{ needs.resolve-config.outputs.tag }}-arm64" || true
 
       - name: Cleanup local manifest refs (DB)
         if: needs.resolve-config.outputs.db_folder_exists == 'true'
         run: |
           docker manifest rm "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.db_image_name }}:${{ needs.resolve-config.outputs.tag }}-amd64" || true
-          docker manifest rm "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.db_image_name }}:${{ needs.resolve-config.outputs.tag }}-arm64" || true
 
       - name: Add summary (application)
         run: |
           echo "### Application Docker Manifest Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "- Image: ${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.service_image_name }}:${{ needs.resolve-config.outputs.tag }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Platforms: amd64, arm64" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Platforms: amd64" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Add summary (DB)
         if: needs.resolve-config.outputs.db_folder_exists == 'true'
         run: |
           echo "### DB Docker Manifest Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "- Image: ${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.db_image_name }}:${{ needs.resolve-config.outputs.tag }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Platforms: amd64, arm64" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Platforms: amd64" >> "$GITHUB_STEP_SUMMARY"
