@@ -717,7 +717,6 @@
 
 
 
-
 name: Build Pipeline
 run-name: Build ${{ github.event.inputs.pipeline_name }}
 
@@ -737,7 +736,8 @@ on:
           - tl-calculator
 
 env:
-  DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+  # ❗ Take both from SECRETS, not vars
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
 jobs:
@@ -782,7 +782,6 @@ jobs:
 
           echo "### Pipeline Name - $PIPELINE_NAME" >> "$GITHUB_STEP_SUMMARY"
 
-          # 1) Get matching config
           MATCHING_CONFIGS=$(yq eval -o=json '.config[] | select(.name | test("/'"$PIPELINE_NAME"'$"))' build/build-config.yml)
           echo "Matching config(s) for pipeline '$PIPELINE_NAME':"
           echo "$MATCHING_CONFIGS" | yq eval -P -
@@ -793,7 +792,6 @@ jobs:
             exit 1
           fi
 
-          # 2) Split service vs DB build
           SERVICE_BUILD_CONFIG=$(yq eval -o=json '
             .config[]
             | select(.name | test("/'"$PIPELINE_NAME"'$"))
@@ -811,7 +809,6 @@ jobs:
           echo "SERVICE_BUILD_CONFIG: $SERVICE_BUILD_CONFIG"
           echo "DB_BUILD_CONFIG: $DB_BUILD_CONFIG"
 
-          # 3) Extract values
           SERVICE_DOCKERFILE=$(echo "$SERVICE_BUILD_CONFIG" | yq eval -r '.dockerfile // ""' -)
           SERVICE_IMAGE_NAME=$(echo "$SERVICE_BUILD_CONFIG" | yq eval -r '.["image-name"] // ""' -)
           SERVICE_WORK_DIR=$(echo "$SERVICE_BUILD_CONFIG" | yq eval -r '.["work-dir"] // ""' -)
@@ -824,13 +821,11 @@ jobs:
             DB_DOCKERFILE=""
           fi
 
-          # 4) Default Dockerfile for service if missing
           if [ -z "$SERVICE_DOCKERFILE" ]; then
             echo "No dockerfile entry found for \"$PIPELINE_NAME\"; using default"
             SERVICE_DOCKERFILE="${SERVICE_WORK_DIR%/}/$DEFAULT_DOCKERFILE"
           fi
 
-          # 5) Export outputs
           echo "SERVICE_WORK_DIR=$SERVICE_WORK_DIR"   >> "$GITHUB_OUTPUT"
           echo "SERVICE_IMAGE_NAME=$SERVICE_IMAGE_NAME" >> "$GITHUB_OUTPUT"
           echo "SERVICE_DOCKERFILE=$SERVICE_DOCKERFILE" >> "$GITHUB_OUTPUT"
@@ -838,7 +833,6 @@ jobs:
           echo "DB_IMAGE_NAME=$DB_IMAGE_NAME"         >> "$GITHUB_OUTPUT"
           echo "DB_DOCKERFILE=$DB_DOCKERFILE"         >> "$GITHUB_OUTPUT"
 
-          # 6) Validate required vars
           missing_vars=()
           for var in SERVICE_WORK_DIR SERVICE_IMAGE_NAME SERVICE_DOCKERFILE; do
             if [ -z "${!var}" ]; then
@@ -925,11 +919,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ matrix.arch }}-buildx-${{ github.event.inputs.pipeline_name }}-
 
+      # Optional: small debug so we fail early if username is empty
+      - name: Debug Docker username
+        run: |
+          if [ -z "${DOCKER_USERNAME:-}" ]; then
+            echo "DOCKER_USERNAME is EMPTY in this job (check GitHub secrets: DOCKER_USERNAME)"
+            exit 1
+          fi
+          echo "Docker username is set (value is masked by GitHub)."
+
       - name: Docker login
         uses: docker/login-action@v2
         with:
-          username: ${{ vars.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          # ✅ now coming from env which is wired to secrets
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Build and push application image
         run: |
@@ -1015,8 +1019,8 @@ jobs:
       - name: Docker login
         uses: docker/login-action@v2
         with:
-          username: ${{ vars.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Create and push Docker manifest (application)
         run: |
@@ -1060,4 +1064,3 @@ jobs:
           echo "### DB Docker Manifest Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "- Image: ${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.db_image_name }}:${{ needs.resolve-config.outputs.tag }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Platforms: amd64, arm64" >> "$GITHUB_STEP_SUMMARY"
-
