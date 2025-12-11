@@ -17,7 +17,7 @@ initContainers: {}
 image:
   # This must match your Docker Hub repo name (egovio/digit-ui-tl:...)
   repository: "pgrdigit/digit-ui-tl"
-  tag: "master-6bc29c4"
+  tag: "master-812216d"
 
 replicas: "1"
 
