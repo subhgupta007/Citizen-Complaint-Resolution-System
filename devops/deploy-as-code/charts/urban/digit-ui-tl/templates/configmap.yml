@@ -5,25 +5,9 @@ metadata:
   namespace: egov
 data:
   sub_filter.conf: |
-    # Apply only on HTML responses (do NOT touch JS bundles)
+    # Apply only on HTML responses (do NOT touch JS)
     sub_filter_once off;
     sub_filter_types text/html;
 
-    # Load PGR global config, then override CONTEXT_PATH for TL only
-    sub_filter '</head>' ' <script src="https://pgr-eks-cluster-assets-bucket.s3.ap-south-1.amazonaws.com/globalConfigsPGR.js" type="text/javascript"></script>
-    <script type="text/javascript">
-      (function() {
-        if (window.globalConfigs && typeof window.globalConfigs.getConfig === "function") {
-          var originalGetConfig = window.globalConfigs.getConfig;
-          window.globalConfigs.getConfig = function(key) {
-            if (key === "CONTEXT_PATH") {
-              return "digit-ui-tl";
-            }
-            return originalGetConfig(key);
-          };
-        } else {
-          // Fallback if globalConfigs is not ready
-          window.contextPath = "digit-ui-tl";
-        }
-      })();
-    </script></head>';
+    # Load TL-specific global config (CONTEXT_PATH = "digit-ui-tl")
+    sub_filter '</head>' ' <script src="https://pgr-eks-cluster-assets-bucket.s3.ap-south-1.amazonaws.com/digit-ui-tl/globalConfigsTL.js" type="text/javascript"></script></head>';
