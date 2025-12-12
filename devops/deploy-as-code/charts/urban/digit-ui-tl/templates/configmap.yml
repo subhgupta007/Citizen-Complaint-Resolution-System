@@ -65,36 +65,36 @@
 
 ################## working version ####################
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: digit-ui-tl
-  namespace: egov
-data:
-  sub_filter.conf: |
-    # Apply only on HTML responses, do NOT touch JS bundles
-    sub_filter_once off;
-    sub_filter_types text/html;
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: digit-ui-tl
+#   namespace: egov
+# data:
+#   sub_filter.conf: |
+#     # Apply only on HTML responses, do NOT touch JS bundles
+#     sub_filter_once off;
+#     sub_filter_types text/html;
 
-    # Inject the globalConfigs script and override the contextPath for TL UI
-    sub_filter '</head>' ' <script src="https://pgr-eks-cluster-assets-bucket.s3.ap-south-1.amazonaws.com/globalConfigsPGR.js" type="text/javascript"></script>
-    <script type="text/javascript">
-      (function() {
-        // Force TL UI context path
-        window.contextPath = "digit-ui-tl";
+#     # Inject the globalConfigs script and override the contextPath for TL UI
+#     sub_filter '</head>' ' <script src="https://pgr-eks-cluster-assets-bucket.s3.ap-south-1.amazonaws.com/globalConfigsPGR.js" type="text/javascript"></script>
+#     <script type="text/javascript">
+#       (function() {
+#         // Force TL UI context path
+#         window.contextPath = "digit-ui-tl";
 
-        // If globalConfigs is present, override only CONTEXT_PATH
-        if (window.globalConfigs && typeof window.globalConfigs.getConfig === "function") {
-          var originalGetConfig = window.globalConfigs.getConfig;
-          window.globalConfigs.getConfig = function(key) {
-            if (key === "CONTEXT_PATH") {
-              return "digit-ui-tl";
-            }
-            return originalGetConfig(key);
-          };
-        }
-      })();
-    </script></head>';
+#         // If globalConfigs is present, override only CONTEXT_PATH
+#         if (window.globalConfigs && typeof window.globalConfigs.getConfig === "function") {
+#           var originalGetConfig = window.globalConfigs.getConfig;
+#           window.globalConfigs.getConfig = function(key) {
+#             if (key === "CONTEXT_PATH") {
+#               return "digit-ui-tl";
+#             }
+#             return originalGetConfig(key);
+#           };
+#         }
+#       })();
+#     </script></head>';
 
 
 #########################################################################
@@ -112,3 +112,26 @@ data:
 
 #     # Inject the global config script (same as PGR for now)
 #     sub_filter '</head>' ' <script src="https://pgr-eks-cluster-assets-bucket.s3.ap-south-1.amazonaws.com/globalConfigsPGR.js" type="text/javascript"></script></head>';
+
+
+
+##############################################
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: digit-ui-tl
+  namespace: egov
+data:
+  sub_filter.conf: |
+    # Apply only on HTML responses, do NOT touch JS bundles
+    sub_filter_once off;
+    sub_filter_types text/html;
+
+    # 1) Inject globalConfigs script for environment
+    sub_filter '</head>' ' <script src="https://pgr-eks-cluster-assets-bucket.s3.ap-south-1.amazonaws.com/globalConfigsPGR.js" type="text/javascript"></script></head>';
+
+    # 2) Rewrite any /digit-ui/ asset URLs in HTML to /digit-ui-tl/
+    #    This affects <script src="/digit-ui/..."> and <link href="/digit-ui/...">
+    sub_filter 'src="/digit-ui/' 'src="/digit-ui-tl/';
+    sub_filter 'href="/digit-ui/' 'href="/digit-ui-tl/';
