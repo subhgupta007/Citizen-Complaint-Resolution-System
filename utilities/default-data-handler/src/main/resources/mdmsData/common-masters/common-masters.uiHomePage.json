@@ -36,7 +36,7 @@
           "name": "Trade Licence",
           "label": "MODULE_TL",
           "enabled": true,
-          "navigationUrl": "/digit-ui/citizen/tl-home"
+          "navigationUrl": "/digit-ui-tl/citizen/tl-home"
         },
         {
           "code": "ACTION_TEST_BPA_STAKEHOLDER_HOME",
