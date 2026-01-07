@@ -3,8 +3,6 @@ labels:
   app: "default-data-handler"
   group: "core"
 
-global:
-  dockerRepo: "pgrdigit"
 # Ingress Configs
 ingress:
   enabled: true
@@ -29,7 +27,7 @@ initContainers:
 
 # Container Configs
 image:
-  repository: "default-data-handler"
+  repository: "pgrdigit/default-data-handler"
   tag: master-f131b9c
 replicas: "1"
 healthChecks:
