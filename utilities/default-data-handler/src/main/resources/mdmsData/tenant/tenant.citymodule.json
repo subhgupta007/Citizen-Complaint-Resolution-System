@@ -46,5 +46,15 @@
         "code": "{tenantid}.cityb"
       }
     ]
+  },
+  {
+    "code": "TL",
+    "order": 2,
+    "active": true,
+    "module": "TL",
+    "tenants": [
+      { "code": "{tenantid}.citya" },
+      { "code": "{tenantid}.cityb" }
+    ]
   }
 ]
