@@ -41,6 +41,9 @@ func main() {
 
 	replaceInFile("../../../../configs/assets/globalConfigsPGR.js", data, true)
 	fmt.Println("env secrets yaml file updated successfully!")
+
+	replaceInFile("../../../../configs/assets/digit-ui-tl/globalConfigsPGR.js", data, true)
+	fmt.Println("digit-ui-tl global config file updated successfully!")
 }
 
 func validateInputs(data map[string]interface{}) {
