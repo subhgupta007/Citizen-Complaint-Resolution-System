@@ -207,9 +207,20 @@ jobs:
           BUCKET=$(terraform output -json s3_assets_bucket | jq -r .)
           echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
         working-directory: devops/infra-as-code/terraform/sample-aws
+      - name: Validate TL asset exists before upload
+        run: |
+          TL_ASSET_PATH="digit-ui-tl/globalConfigsPGR.js"
+          if [ ! -f "$TL_ASSET_PATH" ]; then
+            echo "ERROR: Required TL asset missing at configs/assets/$TL_ASSET_PATH"
+            exit 1
+          fi
+
+          echo "Validated TL asset file exists: configs/assets/$TL_ASSET_PATH"
+        working-directory: configs/assets  
       - name: Upload configs/assets to S3 root
         run: |
           echo "Uploading to s3://${{ steps.get-bucket.outputs.bucket }}/"
+          echo "Using recursive S3 copy without include/exclude filters so nested directories are uploaded."
           aws s3 cp . s3://${{ steps.get-bucket.outputs.bucket }}/ --recursive
         working-directory: configs/assets
         env:
@@ -217,6 +228,26 @@ jobs:
           AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION:  ${{ secrets.AWS_DEFAULT_REGION }}
           AWS_REGION:  ${{ secrets.AWS_REGION }}
+      - name: Verify uploaded TL asset metadatas
+        run: |
+          TL_ASSET_PATH="digit-ui-tl/globalConfigsPGR.js"
+          echo "Verifying uploaded object metadata for $TL_ASSET_PATH"
+          OBJECT_META=$(aws s3api head-object \
+            --bucket "${{ steps.get-bucket.outputs.bucket }}" \
+            --key "$TL_ASSET_PATH")
+
+          E_TAG=$(echo "$OBJECT_META" | jq -r '.ETag')
+          VERSION_ID=$(echo "$OBJECT_META" | jq -r '.VersionId // "null"')
+
+          echo "TL asset upload verification passed."
+          echo "Object key: $TL_ASSET_PATH"
+          echo "Object ETag: $E_TAG"
+          echo "Object VersionId: $VERSION_ID"
+        env:
+          AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION:  ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_REGION:  ${{ secrets.AWS_REGION }}      
       - name: Archive infra-as-code folder
         run: tar -czf infra-as-code.tar.gz devops/infra-as-code/
       - name: Archive deploy-as-code folder
@@ -325,6 +356,15 @@ jobs:
 
             # Verify installation
           helmfile --version
+      - name: Stamp UI config script version for this release
+        run: |
+          RELEASE_TAG="${GITHUB_SHA::12}-${GITHUB_RUN_NUMBER}"
+          echo "Using release tag: ${RELEASE_TAG}"
+          sed -i "s/__RELEASE_TAG__/${RELEASE_TAG}/g" devops/deploy-as-code/charts/environments/env.yaml
+          if rg -n "__RELEASE_TAG__" devops/deploy-as-code/charts/environments/env.yaml; then
+            echo "Unresolved __RELEASE_TAG__ placeholders found." >&2
+            exit 1
+          fi      
       - name: digit deployment
         run: helmfile -f digit-helmfile.yaml -e env apply --include-needs=true
         working-directory: devops/deploy-as-code
