@@ -18,6 +18,29 @@
       return currentPath().indexOf("/employee") !== -1;
     },
   });
+})();
+
+
+(function () {
+  function currentPath() {
+    return (window.location && window.location.pathname) || "";
+  }
+
+  Object.defineProperty(window, "isCitizenRoute", {
+    configurable: true,
+    enumerable: false,
+    get: function () {
+      return currentPath().indexOf("/citizen") !== -1;
+    },
+  });
+
+  Object.defineProperty(window, "isEmployeeRoute", {
+    configurable: true,
+    enumerable: false,
+    get: function () {
+      return currentPath().indexOf("/employee") !== -1;
+    },
+  });
 })()
 
 var globalConfigs = (function () {

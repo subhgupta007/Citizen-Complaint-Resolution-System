@@ -9,6 +9,9 @@ ingress:
   # This will expose the TL UI at:
   #   https://www.pgrdigit.in/digit-ui-tl/
   context: "digit-ui-tl"
+  additionalAnnotations: |
+    nginx.ingress.kubernetes.io/proxy-redirect-from: /digit-ui/
+    nginx.ingress.kubernetes.io/proxy-redirect-to: /digit-ui-tl/
 
 # Init Containers Configs
 initContainers: {}
