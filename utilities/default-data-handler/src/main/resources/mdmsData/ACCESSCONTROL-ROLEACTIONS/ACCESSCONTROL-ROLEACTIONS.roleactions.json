@@ -2385,5 +2385,12 @@
     "rolecode": "WORKFLOW_ADMIN",
     "tenantId": "{tenantid}",
     "actioncode": ""
+  },
+  {
+      "id": 1200,
+      "actionid": 604,
+      "rolecode": "CITIZEN",
+      "tenantId": "{tenantid}",
+      "actioncode": ""
   }
 ]
