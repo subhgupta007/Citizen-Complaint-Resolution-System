@@ -28,7 +28,7 @@ initContainers:
 # Container Configs
 image:
   repository: "pgrdigit/default-data-handler"
-  tag: master-d43ba47
+  tag: master-08be99a
 replicas: "1"
 healthChecks:
   enabled: true
