@@ -22,14 +22,14 @@
           "name": "Miscellaneous Collection",
           "label": "ACTION_TEST_MCOLLECT",
           "enabled": true,
-          "navigationUrl": "/digit-ui/citizen/mcollect-home"
+          "navigationUrl": "/digit-ui-tl/citizen/mcollect-home"
         },
         {
           "code": "CITIZEN_SERVICE_PT",
           "name": "Property Tax",
           "label": "MODULE_PT",
           "enabled": true,
-          "navigationUrl": "/digit-ui/citizen/pt-home"
+          "navigationUrl": "/digit-ui-tl/citizen/pt-home"
         },
         {
           "code": "CITIZEN_SERVICE_TL",
@@ -43,14 +43,14 @@
           "name": "Online Building Permit System",
           "label": "ACTION_TEST_BPA_STAKEHOLDER_HOME",
           "enabled": true,
-          "navigationUrl": "/digit-ui/citizen/obps-home"
+          "navigationUrl": "/digit-ui-tl/citizen/obps-home"
         },
         {
           "code": "ACTION_TEST_WATER_AND_SEWERAGE",
           "name": "Water & Sewerage",
           "label": "ACTION_TEST_WATER_AND_SEWERAGE",
           "enabled": true,
-          "navigationUrl": "/digit-ui/citizen/ws-home"
+          "navigationUrl": "/digit-ui-tl/citizen/ws-home"
         },
         {
           "code": "ACTION_TEST_FIRE_NOC",
@@ -64,21 +64,21 @@
           "name": "Birth Certificate",
           "label": "ACTION_TEST_BIRTH_CERTIFICATE",
           "enabled": true,
-          "navigationUrl": "/digit-ui/citizen/birth-citizen/home"
+          "navigationUrl": "/digit-ui-tl/citizen/birth-citizen/home"
         },
         {
           "code": "ACTION_TEST_DEATH_CERTIFICATE",
           "name": "Death Certificate",
           "label": "ACTION_TEST_DEATH_CERTIFICATE",
           "enabled": true,
-          "navigationUrl": "/digit-ui/citizen/death-citizen/home"
+          "navigationUrl": "/digit-ui-tl/citizen/death-citizen/home"
         }
       ],
       "enabled": true,
       "sideOption": {
         "name": "DASHBOARD_VIEW_ALL_LABEL",
         "enabled": true,
-        "navigationUrl": "/digit-ui/citizen/all-services"
+        "navigationUrl": "/digit-ui-tl/citizen/all-services"
       },
       "headerLabel": "DASHBOARD_CITIZEN_SERVICES_LABEL"
     },
@@ -89,7 +89,7 @@
       "sideOption": {
         "name": "DASHBOARD_VIEW_ALL_LABEL",
         "enabled": true,
-        "navigationUrl": "/digit-ui/citizen/engagement/whats-new"
+        "navigationUrl": "/digit-ui-tl/citizen/engagement/whats-new"
       },
       "headerLabel": "DASHBOARD_WHATS_NEW_LABEL"
     },
@@ -109,21 +109,21 @@
           "name": "Events",
           "label": "EVENTS_EVENTS_HEADER",
           "enabled": true,
-          "navigationUrl": "/digit-ui/citizen/engagement/events"
+          "navigationUrl": "/digit-ui-tl/citizen/engagement/events"
         },
         {
           "code": "CITIZEN_DOCUMENTS",
           "name": "Documents",
           "label": "CS_COMMON_DOCUMENTS",
           "enabled": true,
-          "navigationUrl": "/digit-ui/citizen/engagement/docs"
+          "navigationUrl": "/digit-ui-tl/citizen/engagement/docs"
         },
         {
           "code": "CITIZEN_SURVEYS",
           "name": "Surveys",
           "label": "CS_COMMON_SURVEYS",
           "enabled": true,
-          "navigationUrl": "/digit-ui/citizen/engagement/surveys/list"
+          "navigationUrl": "/digit-ui-tl/citizen/engagement/surveys/list"
         }
       ],
       "enabled": true,
