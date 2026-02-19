@@ -9,9 +9,6 @@ ingress:
   # This will expose the TL UI at:
   #   https://www.pgrdigit.in/digit-ui-tl/
   context: "digit-ui-tl"
-  additionalAnnotations: |
-    nginx.ingress.kubernetes.io/proxy-redirect-from: /digit-ui/
-    nginx.ingress.kubernetes.io/proxy-redirect-to: /digit-ui-tl/
 
 # Init Containers Configs
 initContainers: {}
@@ -20,7 +17,7 @@ initContainers: {}
 image:
   # This must match your Docker Hub repo name (egovio/digit-ui-tl:...)
   repository: "pgrdigit/digit-ui-tl"
-  tag: "master-e01d956"
+  tag: "master-d43ba47"
 
 replicas: "1"
 
