@@ -54,7 +54,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
-          version: v3.14.4
+          version: v3.19.0
 
       - name: Install sops
         run: |
@@ -72,7 +72,12 @@ jobs:
           chmod +x helmfile
           sudo mv helmfile /usr/local/bin/helmfile
           helmfile --version
+
+      - name: Install helm diff plugin
+        run: |
+          rm -rf "${HOME}/.local/share/helm/plugins/helm-diff" || true
           helm plugin install https://github.com/databus23/helm-diff
+          helm plugin list
 
       - name: Generate kubeconfig
         run: aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}"
