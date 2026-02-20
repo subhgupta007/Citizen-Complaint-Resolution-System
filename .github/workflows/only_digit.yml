@@ -1,0 +1,95 @@
+name: DIGIT Deploy Only Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  digit_deploy_only:
+    name: Deploy DIGIT only
+    runs-on: ubuntu-latest
+    env:
+      TF_IN_AUTOMATION: "true"
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Show input yaml
+        run: cat input.yaml
+        working-directory: devops/infra-as-code/terraform/sample-aws
+
+      - name: Convert YAML to ENV
+        uses: dcarbone/yaml-to-env-action@main
+        with:
+          yaml-file: devops/infra-as-code/terraform/sample-aws/input.yaml
+          debug: true
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Install yq
+        run: |
+          VERSION="4.30.8"
+          URL="https://github.com/mikefarah/yq/releases/download/v${VERSION}/yq_linux_amd64"
+          sudo curl -sSL "$URL" -o /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Update configs based on input yaml
+        run: go run init.go
+        working-directory: devops/infra-as-code/terraform/scripts
+
+      - name: Convert env secrets YAML to JSON
+        run: cat devops/deploy-as-code/charts/environments/env-secrets.yaml | yq e -j - > secrets.json
+
+      - name: Extract db password
+        run: |
+          db_password=$(jq -r '.secrets.db.password' secrets.json)
+          echo "db_password=$db_password" >> $GITHUB_ENV
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Install sops
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnupg
+          wget https://github.com/mozilla/sops/releases/download/v3.7.1/sops-v3.7.1.linux -O sops
+          chmod +x sops
+          sudo mv sops /usr/local/bin/sops
+          sops --version
+
+      - name: Install Helmfile
+        run: |
+          HELMFILE_VERSION="v0.140.0"
+          curl -L "https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64" -o helmfile
+          chmod +x helmfile
+          sudo mv helmfile /usr/local/bin/helmfile
+          helmfile --version
+          helm plugin install https://github.com/databus23/helm-diff
+
+      - name: Generate kubeconfig
+        run: aws eks update-kubeconfig --region "${AWS_REGION}" --name "${CLUSTER_NAME}"
+
+      - name: Create namespace
+        run: kubectl create namespace egov
+        continue-on-error: true
+
+      - name: Verify cluster access
+        run: kubectl get nodes
+
+      - name: Deploy DIGIT
+        run: helmfile -f digit-helmfile.yaml -e env apply --include-needs=true
+        working-directory: devops/deploy-as-code
+
+      - name: Show load balancer
+        run: |
+          LB_ID=$(kubectl get svc ingress-nginx-controller -n backbone -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "LoadBalancer ID: $LB_ID"
+          echo "Map this LoadBalancer hostname to the domain from input.yaml"
