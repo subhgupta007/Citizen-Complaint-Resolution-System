@@ -55,5 +55,9 @@ config:
         image-name: "tl-calculator"
         dockerfile: "build/maven/Dockerfile"
       
-
+  - name: "builds/UPYOG_TL/core-services/gateway"
+    build:
+      - work-dir: "upyog-src/core-services/gateway"
+        image-name: "gateway"
+        dockerfile: "build/maven/Dockerfile"
 
