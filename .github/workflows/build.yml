@@ -372,7 +372,6 @@
 
 ################################################
 
-
 name: Build Pipeline
 run-name: Build ${{ github.event.inputs.pipeline_name }}
 
@@ -398,7 +397,7 @@ env:
 
 jobs:
   resolve-config:
-    name: Resolve ${{ github.event.inputs.pipeline_name }} config
+    name: Resolve config for ${{ github.event.inputs.pipeline_name }}
     runs-on: ubuntu-latest
     outputs:
       service_work_dir: ${{ steps.setenv.outputs.SERVICE_WORK_DIR }}
@@ -409,8 +408,7 @@ jobs:
       db_image_name: ${{ steps.setenv.outputs.DB_IMAGE_NAME }}
       db_dockerfile: ${{ steps.setenv.outputs.DB_DOCKERFILE }}
       tag: ${{ steps.tag.outputs.tag }}
-      source_path: ${{ steps.setenv.outputs.SOURCE_PATH }}
-      source_branch: ${{ steps.setenv.outputs.SOURCE_BRANCH }}
+
     steps:
       - name: Checkout Citizen Complaint Resolution System
         uses: actions/checkout@v3
@@ -438,7 +436,7 @@ jobs:
           sudo curl -sSL "$URL" -o /usr/local/bin/yq
           sudo chmod +x /usr/local/bin/yq
 
-      - name: Resolve env
+      - name: Resolve env from build-config.yml
         id: setenv
         run: |
           set -euo pipefail
@@ -446,51 +444,7 @@ jobs:
           PIPELINE_NAME="${{ github.event.inputs.pipeline_name }}"
           DEFAULT_DOCKERFILE="Dockerfile"
 
-          echo "### Pipeline Name - $PIPELINE_NAME" >> "$GITHUB_STEP_SUMMARY"
-
-          if [ "$PIPELINE_NAME" = "gateway" ]; then
-            SERVICE_WORK_DIR="upyog-src/core-services/gateway"
-            SERVICE_IMAGE_NAME="gateway"
-            SERVICE_DOCKERFILE="upyog-src/core-services/gateway/Dockerfile"
-
-            DB_WORK_DIR=""
-            DB_IMAGE_NAME=""
-            DB_DOCKERFILE=""
-
-            SOURCE_PATH="upyog-src"
-            SOURCE_BRANCH="master"
-
-            echo "SERVICE_WORK_DIR=$SERVICE_WORK_DIR"       >> "$GITHUB_OUTPUT"
-            echo "SERVICE_IMAGE_NAME=$SERVICE_IMAGE_NAME"   >> "$GITHUB_OUTPUT"
-            echo "SERVICE_DOCKERFILE=$SERVICE_DOCKERFILE"   >> "$GITHUB_OUTPUT"
-            echo "DB_WORK_DIR=$DB_WORK_DIR"                 >> "$GITHUB_OUTPUT"
-            echo "DB_IMAGE_NAME=$DB_IMAGE_NAME"             >> "$GITHUB_OUTPUT"
-            echo "DB_DOCKERFILE=$DB_DOCKERFILE"             >> "$GITHUB_OUTPUT"
-            echo "SOURCE_PATH=$SOURCE_PATH"                 >> "$GITHUB_OUTPUT"
-            echo "SOURCE_BRANCH=$SOURCE_BRANCH"             >> "$GITHUB_OUTPUT"
-
-            {
-              echo "#### Application Config Summary"
-              echo "Application Work Directory - $SERVICE_WORK_DIR"
-              echo "Image Name - $SERVICE_IMAGE_NAME"
-              echo "Dockerfile Path - $SERVICE_DOCKERFILE"
-              echo ""
-              echo "#### DB Config Summary"
-              echo "Application Work Directory - <none>"
-              echo "Image Name - <none>"
-              echo "Dockerfile Path - <none>"
-              echo ""
-              echo "#### Source Summary"
-              echo "Repo - bdhal1989/UPYOG_TL"
-              echo "Branch - $SOURCE_BRANCH"
-              echo "Path - $SOURCE_PATH"
-            } >> "$GITHUB_STEP_SUMMARY"
-
-            exit 0
-          fi
-
-          SOURCE_PATH="."
-          SOURCE_BRANCH="${GITHUB_REF##*/}"
+          echo "### Pipeline Name: $PIPELINE_NAME" >> "$GITHUB_STEP_SUMMARY"
 
           MATCHING_CONFIGS=$(yq eval -o=json '.config[] | select(.name | test("/'"$PIPELINE_NAME"'$"))' build/build-config.yml)
           echo "Matching config(s) for pipeline '$PIPELINE_NAME':"
@@ -532,8 +486,29 @@ jobs:
           fi
 
           if [ -z "$SERVICE_DOCKERFILE" ]; then
-            echo "No dockerfile entry found for \"$PIPELINE_NAME\"; using default"
+            echo "No dockerfile entry found for '$PIPELINE_NAME', using default Dockerfile inside work dir"
             SERVICE_DOCKERFILE="${SERVICE_WORK_DIR%/}/$DEFAULT_DOCKERFILE"
+          fi
+
+          missing_vars=()
+          for var in SERVICE_WORK_DIR SERVICE_IMAGE_NAME SERVICE_DOCKERFILE; do
+            if [ -z "${!var}" ]; then
+              missing_vars+=("$var")
+            fi
+          done
+          if [ "${#missing_vars[@]}" -gt 0 ]; then
+            echo "ERROR: Required values are missing: ${missing_vars[*]}"
+            exit 1
+          fi
+
+          if [ ! -d "$SERVICE_WORK_DIR" ]; then
+            echo "ERROR: Service work dir not found: $SERVICE_WORK_DIR"
+            exit 1
+          fi
+
+          if [ ! -f "$SERVICE_DOCKERFILE" ]; then
+            echo "ERROR: Dockerfile not found: $SERVICE_DOCKERFILE"
+            exit 1
           fi
 
           echo "SERVICE_WORK_DIR=$SERVICE_WORK_DIR"         >> "$GITHUB_OUTPUT"
@@ -542,35 +517,17 @@ jobs:
           echo "DB_WORK_DIR=$DB_WORK_DIR"                   >> "$GITHUB_OUTPUT"
           echo "DB_IMAGE_NAME=$DB_IMAGE_NAME"               >> "$GITHUB_OUTPUT"
           echo "DB_DOCKERFILE=$DB_DOCKERFILE"               >> "$GITHUB_OUTPUT"
-          echo "SOURCE_PATH=$SOURCE_PATH"                   >> "$GITHUB_OUTPUT"
-          echo "SOURCE_BRANCH=$SOURCE_BRANCH"               >> "$GITHUB_OUTPUT"
-
-          missing_vars=()
-          for var in SERVICE_WORK_DIR SERVICE_IMAGE_NAME SERVICE_DOCKERFILE; do
-            if [ -z "${!var}" ]; then
-              echo "ERROR: $var is not set or is empty"
-              missing_vars+=("$var")
-            fi
-          done
-          if [ "${#missing_vars[@]}" -gt 0 ]; then
-            echo "Required environment variables are missing: ${missing_vars[*]}"
-            exit 1
-          fi
 
           {
             echo "#### Application Config Summary"
-            echo "Application Work Directory - $SERVICE_WORK_DIR"
-            echo "Image Name - $SERVICE_IMAGE_NAME"
-            echo "Dockerfile Path - $SERVICE_DOCKERFILE"
+            echo "Work Directory: $SERVICE_WORK_DIR"
+            echo "Image Name: $SERVICE_IMAGE_NAME"
+            echo "Dockerfile Path: $SERVICE_DOCKERFILE"
             echo ""
             echo "#### DB Config Summary"
-            echo "Application Work Directory - ${DB_WORK_DIR:-<none>}"
-            echo "Image Name - ${DB_IMAGE_NAME:-<none>}"
-            echo "Dockerfile Path - ${DB_DOCKERFILE:-<none>}"
-            echo ""
-            echo "#### Source Summary"
-            echo "Branch - $SOURCE_BRANCH"
-            echo "Path - $SOURCE_PATH"
+            echo "DB Work Directory: ${DB_WORK_DIR:-<none>}"
+            echo "DB Image Name: ${DB_IMAGE_NAME:-<none>}"
+            echo "DB Dockerfile Path: ${DB_DOCKERFILE:-<none>}"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check if DB folder exists
@@ -589,23 +546,21 @@ jobs:
           set -euo pipefail
 
           PIPELINE_NAME="${{ github.event.inputs.pipeline_name }}"
-          SOURCE_PATH="${{ steps.setenv.outputs.SOURCE_PATH }}"
-          SOURCE_BRANCH="${{ steps.setenv.outputs.SOURCE_BRANCH }}"
 
           if [ "$PIPELINE_NAME" = "gateway" ]; then
-            BRANCH="$SOURCE_BRANCH"
-            cd "$SOURCE_PATH"
+            cd upyog-src
             COMMIT_HASH="$(git rev-parse --short HEAD)"
+            BRANCH="master"
             cd -
           else
-            BRANCH="${GITHUB_REF##*/}"
             COMMIT_HASH="$(git rev-parse --short HEAD)"
+            BRANCH="${GITHUB_REF##*/}"
           fi
 
           TAG="${BRANCH}-${COMMIT_HASH}"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "TAG=$TAG" >> "$GITHUB_ENV"
-          echo "tag - $TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "Tag: $TAG" >> "$GITHUB_STEP_SUMMARY"
 
   build-matrix:
     name: Build image for ${{ matrix.arch }}
@@ -620,6 +575,7 @@ jobs:
     outputs:
       amd64_digest: ${{ steps.digest_amd64.outputs.digest }}
       amd64_digest_db: ${{ steps.digest_db_amd64.outputs.digest }}
+
     steps:
       - name: Checkout Citizen Complaint Resolution System
         uses: actions/checkout@v3
@@ -643,6 +599,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Ensure cache dir exists
+        run: |
+          mkdir -p /tmp/.buildx-cache
+
       - name: Cache Docker layers
         uses: actions/cache@v3
         with:
@@ -654,10 +614,10 @@ jobs:
       - name: Debug Docker username
         run: |
           if [ -z "${DOCKER_USERNAME:-}" ]; then
-            echo "DOCKER_USERNAME is EMPTY in this job (check GitHub secrets: DOCKER_USERNAME)"
+            echo "DOCKER_USERNAME is empty, check GitHub secrets"
             exit 1
           fi
-          echo "Docker username is set (value is masked by GitHub)."
+          echo "Docker username is set"
 
       - name: Docker login
         uses: docker/login-action@v2
@@ -692,12 +652,12 @@ jobs:
             --iidfile db-digest.txt \
             "${{ needs.resolve-config.outputs.db_work_dir }}"
 
-      - name: Inspect service image manifest list
+      - name: Inspect service image
         run: |
           docker buildx imagetools inspect \
             "${DOCKER_USERNAME}/${{ needs.resolve-config.outputs.service_image_name }}:${{ needs.resolve-config.outputs.tag }}-${{ matrix.arch }}"
 
-      - name: Inspect DB image manifest list
+      - name: Inspect DB image
         if: ${{ needs.resolve-config.outputs.db_folder_exists == 'true' }}
         run: |
           docker buildx imagetools inspect \
@@ -727,6 +687,7 @@ jobs:
       - resolve-config
       - build-matrix
     runs-on: ubuntu-latest
+
     steps:
       - name: Docker login
         uses: docker/login-action@v2
@@ -734,7 +695,7 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Create and push Docker manifest (application)
+      - name: Create and push manifest (application)
         run: |
           set -euxo pipefail
 
@@ -743,7 +704,7 @@ jobs:
           AMD64_DIGEST="${{ needs.build-matrix.outputs.amd64_digest }}"
 
           if [ -z "$AMD64_DIGEST" ]; then
-            echo "ERROR: amd64_digest is empty, cannot create application manifest"
+            echo "ERROR: amd64 digest is empty, cannot create manifest"
             exit 1
           fi
 
@@ -753,7 +714,7 @@ jobs:
 
           docker manifest push "${IMAGE_BASE}:${TAG}"
 
-      - name: Create and push Docker manifest (DB)
+      - name: Create and push manifest (DB)
         if: needs.resolve-config.outputs.db_folder_exists == 'true'
         run: |
           set -euxo pipefail
@@ -763,7 +724,7 @@ jobs:
           AMD64_DIGEST_DB="${{ needs.build-matrix.outputs.amd64_digest_db }}"
 
           if [ -z "$AMD64_DIGEST_DB" ]; then
-            echo "ERROR: amd64_digest_db is empty, cannot create DB manifest"
+            echo "ERROR: amd64 db digest is empty, cannot create db manifest"
             exit 1
           fi
 
